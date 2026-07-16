@@ -1,14 +1,24 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import api from "../services/api";
 
 function AssistantPage() {
+  const [searchParams] = useSearchParams();
+
   const [question, setQuestion] = useState("");
   const [language, setLanguage] = useState("English");
   const [answer, setAnswer] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const askAssistant = async () => {
-    if (!question.trim()) {
+  const autoQuestionSent = useRef(false);
+
+  const askAssistant = async (customQuestion = "") => {
+    const finalQuestion =
+      typeof customQuestion === "string" && customQuestion.trim()
+        ? customQuestion.trim()
+        : question.trim();
+
+    if (!finalQuestion) {
       alert("Please enter a question.");
       return;
     }
@@ -16,25 +26,37 @@ function AssistantPage() {
     try {
       setLoading(true);
       setAnswer("");
+      setQuestion(finalQuestion);
 
       const response = await api.post("/ask", {
-        question: question,
+        question: finalQuestion,
         language: language,
       });
 
       setAnswer(response.data.answer);
     } catch (error) {
-      console.error(error);
+      console.error("AI Assistant error:", error);
       alert("AI Assistant failed. Check backend server.");
     } finally {
       setLoading(false);
     }
   };
 
+  useEffect(() => {
+    const autoQuestion = searchParams.get("question");
+
+    if (autoQuestion && !autoQuestionSent.current) {
+      autoQuestionSent.current = true;
+      setQuestion(autoQuestion);
+      askAssistant(autoQuestion);
+    }
+  }, [searchParams]);
+
   return (
     <>
       <div className="hero">
         <h1>AI Business Assistant</h1>
+
         <p>
           Ask questions about services, pricing, audit, policies, and delivery
           process.
@@ -47,6 +69,7 @@ function AssistantPage() {
         <div className="form-grid">
           <div>
             <label>Language</label>
+
             <select
               value={language}
               onChange={(e) => setLanguage(e.target.value)}
@@ -89,7 +112,11 @@ function AssistantPage() {
           onChange={(e) => setQuestion(e.target.value)}
         />
 
-        <button onClick={askAssistant} disabled={loading}>
+        <button
+          type="button"
+          onClick={() => askAssistant()}
+          disabled={loading}
+        >
           {loading ? "Thinking..." : "Ask AI"}
         </button>
 

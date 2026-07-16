@@ -1,13 +1,14 @@
 import { Routes, Route } from "react-router-dom";
 import Sidebar from "./components/Sidebar";
-
+import ServiceCategoryDetails from "./components/ServiceCategoryDetails";
+import ServicesPage from "./pages/ServicesPage";
 import DashboardPage from "./pages/DashboardPage";
 import PricingPage from "./pages/PricingPage";
-import ServicesPage from "./pages/ServicesPage";
 import QuotationPage from "./pages/QuotationPage";
 import InvoicePage from "./pages/InvoicePage";
 import AssistantPage from "./pages/AssistantPage";
 import SettingsPage from "./pages/SettingsPage";
+import ServiceSolutionDetails from "./components/ServiceSolutionDetails";
 
 function App() {
   return (
@@ -18,6 +19,16 @@ function App() {
         <Routes>
           <Route path="/" element={<DashboardPage />} />
           <Route path="/services" element={<ServicesPage />} />
+
+          <Route
+           path="/services/:categoryId"
+           element={<ServiceCategoryDetails />}
+         />
+
+         <Route
+           path="/services/:categoryId/:solutionName"
+           element={<ServiceSolutionDetails />}
+         />
           <Route path="/pricing" element={<PricingPage />} />
           <Route path="/quotations" element={<QuotationPage />} />
           <Route path="/invoices" element={<InvoicePage />} />
